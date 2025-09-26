@@ -1,31 +1,32 @@
+import inotify
+import inotify.adapters
 import os
-from dotenv import find_dotenv, load_dotenv
-from pathlib import Path
-load_dotenv(find_dotenv())
-PATH = os.getenv("PATH")
+from datetime import datetime
 
-def count_directory_size(directory):
 
-    files = os.listdir(directory)
-    count = 0
-    for file in files:
-        count +=1
-    print(count)
+def monitor_downloads():
+    watch_path = r"C:\Users\Caleb\Downloads\tmp"
 
-#Высокоуровневый подход
-def count_folder_size(directory):
-    path = Path(directory)
-    folder_size = 0
-    for x in path.iterdir():
-        folder_size+=1
-    return folder_size
+    if not os.path.exists(watch_path):
+        os.makedirs(watch_path)
+        print(f"Created directory: {watch_path}")
+
+    i = inotify.adapters.Inotify()
+    i.add_watch(watch_path)
+
+    print(f"Monitoring for file changes in: {watch_path}")
+    print("Press Ctrl+C to stop monitoring\n")
+
+    try:
+        for event in i.event_gen(yield_nones=False):
+            (_, type_names, path, filename) = event
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            print(f"[{timestamp}] PATH: {path} FILE: {filename} EVENTS: {type_names}")
+
+    except KeyboardInterrupt:
+        print("\nMonitoring stopped.")
 
 
 if __name__ == '__main__':
-    print(count_folder_size('C:/Users'))
-    # filepath = input("Enter a file path to access:")
-    # if os.path.exists(filepath):
-    #     count_directory_size(filepath)
-    # else:
-    #     # count_directory_size(PATH)
-    #
+    monitor_downloads()
