@@ -2,7 +2,7 @@ import os
 from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
-path = os.getenv("VAR")
+path = os.getenv("PATH")
 
 def count_directory_size(directory):
 
@@ -13,4 +13,8 @@ def count_directory_size(directory):
     print(count)
 
 if __name__ == '__main__':
-    count_directory_size(path)
+    filepath = input("Enter a file path to access:")
+    if os.path.exists(filepath):
+        count_directory_size(filepath)
+    else:
+        count_directory_size(path)
