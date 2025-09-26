@@ -1,32 +1,17 @@
-import inotify
-import inotify.adapters
 import os
-from datetime import datetime
+from pathlib import Path
 
-
-def monitor_downloads():
-    watch_path = r"C:\Users\Caleb\Downloads\tmp"
-
-    if not os.path.exists(watch_path):
-        os.makedirs(watch_path)
-        print(f"Created directory: {watch_path}")
-
-    i = inotify.adapters.Inotify()
-    i.add_watch(watch_path)
-
-    print(f"Monitoring for file changes in: {watch_path}")
-    print("Press Ctrl+C to stop monitoring\n")
-
+def change_file_extensions_in_folder(folder_path, old_extension, new_extension):
     try:
-        for event in i.event_gen(yield_nones=False):
-            (_, type_names, path, filename) = event
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            print(f"[{timestamp}] PATH: {path} FILE: {filename} EVENTS: {type_names}")
-
-    except KeyboardInterrupt:
-        print("\nMonitoring stopped.")
-
-
-if __name__ == '__main__':
-    monitor_downloads()
+        for entry in os.scandir(folder_path):
+            if entry.is_file():
+                file_path = Path(entry.path)
+                if file_path.suffix == old_extension:
+                    new_file_path = file_path.with_suffix(new_extension)
+                    os.rename(file_path, new_file_path)
+                    print(f"Renamed '{file_path.name}' to '{new_file_path.name}'")
+    except FileNotFoundError:
+        print(f"Error: Folder '{folder_path}' not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+change_file_extensions_in_folder("C:/Users/Caleb/Downloads/tmp", ".txt", ".js")
